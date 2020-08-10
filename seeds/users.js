@@ -11,7 +11,7 @@ exports.seed = function (knex) {
           password: '123',
         },
         {
-          phone_number: '38096333222',
+          phone: '38096333222',
           password: '123',
         },
       ];
