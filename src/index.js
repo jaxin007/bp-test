@@ -35,7 +35,7 @@ app.get('/latency', async (req, res) => {
     .then(() => Date.now() - timeOnBeginning)
     .catch((err) => console.error((err)));
 
-  res.status(200).json({ Latency: `${responseLatency}ms` });
+  res.status(200).json({ latency: responseLatency });
 });
 
 app.post('/signup', async (req, res) => {
