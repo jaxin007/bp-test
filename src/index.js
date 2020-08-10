@@ -1,6 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
+const axios = require('axios');
 const { usersService } = require('./services/index');
 require('express-async-errors');
 
@@ -21,6 +22,21 @@ app.use(cors({
 }));
 
 app.use((err, request, response, next) => response.status(500).json({ errorMessage: err }));
+
+app.get('/info', async (req, res) => {
+  const allUsers = await usersService.getAllUsers();
+  return res.status(200).json(allUsers);
+});
+
+app.get('/latency', async (req, res) => {
+  const timeOnBeginning = Date.now();
+
+  const responseLatency = await axios.get('https://google.com')
+    .then(() => Date.now() - timeOnBeginning)
+    .catch((err) => console.error((err)));
+
+  res.status(200).json({ Latency: `${responseLatency}ms` });
+});
 
 app.post('/signup', async (req, res) => {
   const { email, password } = req.body;
