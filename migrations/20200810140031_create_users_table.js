@@ -9,8 +9,9 @@ exports.up = function (knex) {
     if (!exists) {
       return knex.schema.createTable('users', (table) => {
         table.increments('id').primary();
-        table.string('email', 100).unique().notNullable();
-        table.integer('phone_number', 20).unique().notNullable();
+        table.string('email', 100).unique();
+        table.bigInteger('phone_number').unique();
+        table.string('password', 100).notNullable();
         table.integer('id_type', 1);
       });
     }

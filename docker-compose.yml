@@ -1,0 +1,14 @@
+version: "3"
+
+services:
+
+  postgres:
+    container_name: "bp-test-postgres"
+    image: "postgres:12"
+    ports:
+      - "3300:3300"
+    env_file: .env
+
+volumes:
+  data_backend_libs:
+    driver: local
