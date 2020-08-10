@@ -6,7 +6,13 @@
   "scripts": {
     "start": "nodemon ./src/index.js",
     "lint": "eslint ./src/**/*.js",
-    "lint:fix": "eslint ./src/**/*.js --fix "
+    "lint:fix": "eslint ./src/**/*.js --fix ",
+    "migrate": "npx knex migrate:latest",
+    "migrate:rollback": "npx knex migrate:rollback",
+    "seed": "npx knex seed:run",
+    "docker:pg": "docker-compose up postgres",
+    "docker:touch-pg": "docker exec -it bp-test-postgres psql -U postgres",
+    "docker:down": "docker-compose down"
   },
   "repository": {
     "type": "git",
