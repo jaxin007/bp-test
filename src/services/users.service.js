@@ -40,6 +40,16 @@ class UsersService {
       throw new Error('Duplicate email or phone');
     }
   }
+
+  async getAllUsers() {
+    const allUsers = await this
+      .postgresService
+      .knex('users')
+      .select(['id', 'id_type'])
+      .returning('*');
+
+    return allUsers;
+  }
 }
 
 module.exports = {
