@@ -11,6 +11,8 @@
     "migrate:rollback": "npx knex migrate:rollback",
     "seed": "npx knex seed:run",
     "docker:pg": "docker-compose up postgres",
+    "docker:init": "docker-compose build backend && npm run docker:migrate && docker-compose up ",
+    "docker:migrate": "docker-compose run --rm backend npm run migrate",
     "docker:touch-pg": "docker exec -it bp-test-postgres psql -U postgres",
     "docker:down": "docker-compose down"
   },

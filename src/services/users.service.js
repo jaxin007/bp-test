@@ -44,7 +44,7 @@ class UsersService {
 
       return newUser[0];
     } catch (err) {
-      throw new Error('Duplicate email or phone');
+      throw new Error(err.detail);
     }
   }
 
