@@ -10,8 +10,8 @@ exports.up = function (knex) {
       return knex.schema.createTable('users', (table) => {
         table.increments('id').primary();
         table.string('email', 100).unique();
-        table.bigInteger('phone').unique();
-        table.string('password', 100).notNullable();
+        table.bigInteger('phone').unique().defaultTo(null);
+        table.string('password', 100).notNullable().defaultTo(null);
         table.integer('id_type', 1);
       });
     }

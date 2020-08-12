@@ -1,18 +1,22 @@
+/* eslint-disable no-shadow */
 const knex = require('knex');
+const { hashPassword } = require('../src/utils/bcrypt');
 
-// eslint-disable-next-line no-shadow
-exports.seed = function (knex) {
+exports.seed = async function (knex) {
   // Deletes ALL existing entries
+  const hash = await hashPassword('123');
   return knex('users').del()
     .then(() => {
       const seedUsers = [
         {
           email: 'dima@gmail.com',
-          password: '123',
+          password: hash,
+          id_type: 0,
         },
         {
           phone: '38096333222',
-          password: '123',
+          password: hash,
+          id_type: 1,
         },
       ];
       // Inserts seed entries
