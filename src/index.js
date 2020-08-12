@@ -1,25 +1,13 @@
+/* eslint-disable camelcase */
 const express = require('express');
 const bodyParser = require('body-parser');
-const jwt = require('jsonwebtoken');
 const cors = require('cors');
 const passport = require('passport');
-const passportJWT = require('passport-jwt');
 const axios = require('axios');
 require('dotenv').config();
-const { usersService } = require('./services/index');
 require('express-async-errors');
-
-const JwtStrategy = passportJWT.Strategy;
-const { ExtractJwt } = passportJWT;
-
-const opts = {
-  jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-  secretOrKey: process.env.JWT_SECRET_KEY,
-};
-
-const strategy = new JwtStrategy(opts, (payload, next) => {
-  next(null, payload);
-});
+const { usersService, authService } = require('./services/index');
+const { strategy } = require('./utils/passport-config');
 
 passport.use(strategy);
 
@@ -42,7 +30,7 @@ app.use(cors({
 
 app.use((err, request, response, next) => response.status(500).json({ errorMessage: err }));
 
-app.get('/users', async (req, res) => {
+app.get('/users', passport.authenticate('jwt', { session: false }), async (req, res) => {
   const allUsers = await usersService.getAllUsers();
 
   res.status(200).json(allUsers);
@@ -54,17 +42,17 @@ app.get('/info', passport.authenticate('jwt', { session: false }), async (req, r
     .authorization
     .split(' ')[1]; // format of jwt token is 'Bearer <token'. We need only <token> info.
 
-  await jwt.verify(token, '123', (err, authData) => {
-    if (err) {
-      console.error(err);
-      return res.status(403).json({ errMessage: err });
-    }
+  const authData = await authService
+    .verifyToken(token)
+    .catch((err) => res.status(403).json({ errMessage: err }));
 
-    return res.json({ authData });
-  });
+  const { id, id_type } = authData;
+
+  const newTokens = await authService.generateTokens({ id, id_type });
+  return res.json({ authData, newTokens });
 });
 
-app.get('/latency', async (req, res) => {
+app.get('/latency', passport.authenticate('jwt', { session: false }), async (req, res) => {
   const timeOnBeginning = Date.now();
 
   const responseLatency = await axios.get('https://google.com')
@@ -78,11 +66,11 @@ app.post('/signup', async (req, res) => {
   const userData = req.body;
   try {
     const newUser = await usersService.createNewUser(userData);
+    const { id, id_type } = newUser;
 
-    const JwtSecretKey = process.env.JWT_SECRET_KEY;
-    const token = jwt.sign({ id: newUser.id, id_type: newUser.id_type }, JwtSecretKey, { expiresIn: '10m' });
+    const tokens = await authService.generateTokens({ id, id_type });
 
-    return res.json({ token });
+    return res.json(tokens);
   } catch (err) {
     console.error(err);
 
@@ -97,14 +85,15 @@ app.post('/signin', async (req, res) => {
 
   const userByData = await usersService
     .getUserById(userData)
-    .then((user) => {
+    .then(async (user) => {
       if (!user) {
         return res.status(401).json({ errorMessage: 'wrong data' });
       }
 
-      const token = jwt.sign(user, process.env.JWT_SECRET_KEY, { expiresIn: '10m' });
+      const { id, id_type } = user;
+      const tokens = await authService.generateTokens({ id, id_type });
 
-      return res.status(200).json({ token });
+      return res.status(200).json(tokens);
     })
     .catch((err) => {
       console.error(err);
