@@ -1,6 +1,17 @@
 version: "3"
 
 services:
+  backend:
+    container_name: "bp-test_backend"
+    build: .
+    volumes:
+      - ".:/app"
+      - "/app/node_modules"
+    ports:
+      - "3000:3000"
+    env_file: ".env"
+    depends_on:
+      - postgres
 
   postgres:
     container_name: "bp-test-postgres"
